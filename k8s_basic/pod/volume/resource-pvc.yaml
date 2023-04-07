@@ -6,7 +6,6 @@ metadata:
   labels:
     app: my-pvc
 spec:
-  selector: mypv
   storageClassName: slow
   accessModes:
   - ReadWriteOnce
