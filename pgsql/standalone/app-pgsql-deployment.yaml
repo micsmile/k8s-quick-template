@@ -1,0 +1,89 @@
+# apiVersion: v1
+# kind: ConfigMap
+# metadata:
+#   name: pgsql-standard-config
+#   labels:
+#     app: pgsql-standard
+# data:
+#   POSTGRES_USER: postgres
+#   POSTGRES_PASSWORD: postgres
+#   PGDATA: /var/lib/postgresql/data
+# ---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pg-data
+spec:
+  capacity:
+    storage: 1Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  nfs:
+    path: /pgsql/data
+    server: 192.68.31.220
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pg-data-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: pgsql-dev
+  namespace: default
+  labels:
+    app: pgsql-dev
+spec:
+  selector:
+    matchLabels:
+      app: pgsql-dev
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: pgsql-dev
+    spec:
+      containers:
+      - name: pgsql-dev
+        image: postgres:13
+        env:
+          - name:  POSTGRES_USER
+            value: postgres
+          - name:  POSTGRES_PASSWORD
+            value: postgres
+          - name:  PGDATA
+            value: /var/lib/postgresql/data
+        ports:
+        - containerPort:  5432
+          name: pgsql-dev
+        volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: data 
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: pg-data-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgresql-standard
+spec:
+  selector:
+    app: postgresql-standard
+  type: NodePort
+  ports:
+  - name: postgresql-standard-svc
+    protocol: TCP
+    port: 5432
+    targetPort: 5432
+    nodePort: 32166

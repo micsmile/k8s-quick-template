@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  labels:
+    app: redis
+spec:
+  selector:
+    matchLabels:
+      app: redis
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:7.0.11
+        resources:
+          requests:
+            cpu: 50m
+            memory: 500Mi
+          limits:
+            cpu: 50m
+            memory: 500Mi
+        command: ["redis-server","/etc/redis/redis.conf"]
+        ports:
+        - containerPort:  6379
+          name:  redis
+        volumeMounts:
+        - name: localtime
+          mountPath: /etc/localtime
+        - name: redis-config
+          mountPath: /etc/redis/redis.conf
+          subPath: redis.conf
+      volumes:
+        - name: redis-config
+          configMap:
+            name: redis-master-cfg
+            items:
+            - key: "master.conf"
+              path: "redis.conf"
+        - name: localtime
+          hostPath:
+            path: /usr/share/zoneinfo/Asia/Shanghai
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-svc
+spec:
+  selector:
+    app: redis
+  type: NodePort
+  ports:
+  - name: redis
+    protocol: TCP
+    port: 6379
+    targetPort: 6379
+    nodePort: 32379
