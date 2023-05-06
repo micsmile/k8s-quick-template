@@ -1,16 +1,19 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: redis-sentinel
+  name: redis-sentinel-cfg
   labels:
-    app: redis-sentinel
+    app: redis-sentinel-cfg
 data:
-  master.conf: |
-   bind 0.0.0.0
   sentinel.conf: |
    # 哨兵配置
    port 26379
-   sentinel monitor mymaster redis-0.redis-svc 6379 2
+   sentinel monitor mymaster redis-master-svc.default.svc.cluster.local 6379 2
    sentinel down-after-milliseconds mymaster 60000
    sentinel failover-timeout mymaster 180000
-   sentinel parallel-syncs mymaster 1 
+   sentinel parallel-syncs mymaster 1
+   protected-mode no
+   sentinel deny-scripts-reconfig yes
+   SENTINEL resolve-hostnames yes
+   SENTINEL announce-hostnames no
+   dir /tmp
