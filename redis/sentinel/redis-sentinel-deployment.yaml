@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-sentinel
+  labels:
+    app: redis-sentinel
+spec:
+  selector:
+    matchLabels:
+      app: redis-sentinel
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: redis-sentinel
+    spec:
+      containers:
+      - name: redis-sentinel
+        image: redis:7.0.11
+        command:
+        - bash
+        - "-c"
+        - |
+          set ex
+          cp /etc/redis/redis.conf /data/redis.conf;redis-sentinel /data/redis.conf
+        ports:
+        - containerPort:  26379
+          name:  redis
+        volumeMounts:
+        - name: localtime
+          mountPath: /etc/localtime
+        - name: redis-config
+          mountPath: /etc/redis/redis.conf
+          subPath: redis.conf
+      volumes:
+        - name: redis-config
+          configMap:
+            name: redis-sentinel-cfg
+            items:
+            - key: "sentinel.conf"
+              path: "redis.conf"
+        - name: localtime
+          hostPath:
+            path: /usr/share/zoneinfo/Asia/Shanghai
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-sentinel-svc
+spec:
+  selector:
+    app: redis-sentinel
+  type: NodePort
+  ports:
+  - name: redis-sentinel
+    protocol: TCP
+    port: 26379
+    targetPort: 26379
+    nodePort: 32381

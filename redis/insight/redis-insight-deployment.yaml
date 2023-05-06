@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name:  redis-insight
+  labels:
+    app:  redis-insight
+spec:
+  selector:
+    matchLabels:
+      app: redis-insight
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app:  redis-insight
+    spec:
+      containers:
+      - name:  redis-insight
+        image:  redislabs/redisinsight:1.14
+        ports:
+        - containerPort:  8001
+          name:  redis-insight
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-insight-svc
+  namespace: default
+spec:
+  selector:
+    app: redis-insight
+  type: NodePort
+  ports:
+  - name: redis-insight-svc
+    protocol: TCP
+    port: 8001
+    targetPort: 8001
