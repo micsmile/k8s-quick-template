@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: emqx-dev
+  namespace: default
+  labels:
+    app: emqx-dev
+spec:
+  selector:
+    matchLabels:
+      app: emqx-dev
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: emqx-dev
+    spec:
+      containers:
+      - name: emqx-dev
+        image: emqx/emqx:5.0.24
+        env:
+        - name:  POSTGRES_USER
+          value: postgres
+        ports:
+        - name: emqx-p1
+          containerPort: 1883
+        - name: emqx-p2
+          containerPort: 8083
+        - name: emqx-p3
+          containerPort: 8084
+        - name: emqx-p4
+          containerPort: 8883
+        - name: emqx-p5
+          containerPort: 18083
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: emqx-svc
+spec:
+  selector:
+    app: postgresql-standard
+  type: NodePort
+  ports:
+  - name: emqx-p1
+    protocol: TCP
+    port: 1883
+    targetPort: 1883
+  - name: emqx-p2
+    protocol: TCP
+    port: 8083
+    targetPort: 8083
+  - name: emqx-p3
+    protocol: TCP
+    port: 8084
+    targetPort: 8084
+  - name: emqx-p4
+    protocol: TCP
+    port: 8883
+    targetPort: 1883  
+  - name: emqx-p5
+    protocol: TCP
+    port: 18083
+    targetPort: 18083       

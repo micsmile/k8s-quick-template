@@ -9,9 +9,6 @@ spec:
   accessModes:
     - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
-  nfs:
-    path: /pgsql/data
-    server: 192.68.31.220
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

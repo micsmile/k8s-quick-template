@@ -6,6 +6,12 @@ metadata:
     app: redis-master-cfg
 data:
   master.conf: |
+   loadmodule /etc/redis/modules/redisai.so
+   loadmodule /etc/redis/modules/redisearch.so
+   loadmodule /etc/redis/modules/redisgraph.so
+   loadmodule /etc/redis/modules/redistimeseries.so
+   loadmodule /etc/redis/modules/rejson.so
+   loadmodule /etc/redis/modules/redisbloom.so
    bind 0.0.0.0
    daemonize no
    tcp-backlog 511

@@ -1,0 +1,33 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: redis-stack-pv
+spec:
+  capacity:
+    storage: 300Mi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadOnlyMany
+  persistentVolumeReclaimPolicy: Recycle
+  storageClassName: redis-stack
+  mountOptions:
+    - hard
+    - nfsvers=4.1
+  nfs:
+    path: /redis-stack/
+    server: 192.68.31.220
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: redis-stack-pvc
+  namespace: default
+  labels:
+    app: redis-stack-pvc
+spec:
+  storageClassName: redis-stack
+  accessModes:
+  - ReadOnlyMany
+  resources:
+    requests:
+      storage: 300Mi

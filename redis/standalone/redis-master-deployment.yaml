@@ -28,7 +28,9 @@ spec:
         ports:
         - containerPort:  6379
           name:  redis
-        volumeMounts:
+        volumeMounts: 
+        - name: modules # 此处按需挂载
+          mountPath: /etc/redis/modules
         - name: localtime
           mountPath: /etc/localtime
         - name: redis-config
@@ -44,11 +46,15 @@ spec:
         - name: localtime
           hostPath:
             path: /usr/share/zoneinfo/Asia/Shanghai
+        # 此处按需挂载    
+        - name: modules
+          persistentVolumeClaim:
+            claimName: redis-pvc
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: redis-svc
+  name: redis-master-svc
 spec:
   selector:
     app: redis
